@@ -1,0 +1,6 @@
+$out_root/
+{
+  include libcrails-sidekix/
+}
+
+export $out_root/libcrails-sidekix/$import.target

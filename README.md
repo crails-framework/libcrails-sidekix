@@ -1,0 +1,3 @@
+# libcrails-sidekix
+
+C++ library

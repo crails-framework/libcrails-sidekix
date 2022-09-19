@@ -1,0 +1,34 @@
+import intf_libs += libcrails-random%lib{crails-random}
+import intf_libs += libcrails-readfile%lib{crails-readfile}
+import intf_libs += libcrails%lib{crails}
+
+lib{crails-sidekix}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+
+hxx{export}@./: cxx.importable = false
+
+# Build options.
+#
+cxx.poptions =+ "-I$out_root" "-I$src_root"
+
+{hbmia obja}{*}: cxx.poptions += -DLIBCRAILS_STATIC_BUILD
+{hbmis objs}{*}: cxx.poptions += -DLIBCRAILS_SHARED_BUILD
+
+lib{crails-sidekix}:
+{
+  cxx.export.poptions = "-I$out_root/libcrails-sidekix/" "-I$src_root/libcrails-sidekix/"
+  cxx.export.libs = $intf_libs
+}
+
+liba{crails-sidekix}: cxx.export.poptions += -DLIBCRAILS_STATIC
+libs{crails-sidekix}: cxx.export.poptions += -DLIBCRAILS_SHARED
+
+if $version.pre_release
+  lib{crails-sidekix}: bin.lib.version = "-$version.project_id"
+else
+  lib{crails-sidekix}: bin.lib.version = "-$version.major.$version.minor"
+
+{hxx ixx txx}{*}:
+{
+  install         = include/
+  install.subdirs = true
+}
