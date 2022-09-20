@@ -7,6 +7,8 @@
 # include <boost/process.hpp>
 # include <signal.h>
 # include <filesystem>
+# include <thread>
+# include <mutex>
 # ifdef _WIN32
 #  include <Windows.h>
 # endif
@@ -17,8 +19,12 @@ namespace Sidekix
   {
     SINGLETON(Process)
     std::unique_ptr<boost::process::child> process;
-
-    Process(int argc, char** argv)
+    std::unique_ptr<std::thread> watcher;
+    boost::process::detail::api::pid_t pid;
+    bool auto_restart = true;
+    std::mutex mutex;
+  public:
+    Process(int argc, const char** argv)
     {
       Crails::ProgramOptions options(argc, const_cast<const char**>(argv));
       std::stringstream command;
@@ -29,20 +35,34 @@ namespace Sidekix
       if (options.get_error_log_file().length() > 0)
         command << " -e \"" << transform_logpath(options.get_error_log_file()) << '"';
       Crails::logger << Crails::Logger::Info << "Starting sidekix (" << command.str() << ')' << Crails::Logger::endl;
-      process.reset(
-        new boost::process::child(command.str())
-      );
+      watcher.reset(new std::thread(std::bind(&Sidekix::Process::watch, this, command.str())));
     }
 
     ~Process()
     {
       Crails::logger << Crails::Logger::Info << "Stopping sidekix" << Crails::Logger::endl;
+      mutex.lock();
+      auto_restart = false;
       kill(SIGINT, process->id());
-      process->wait();
+      mutex.unlock();
+      watcher->join();
       Crails::logger << Crails::Logger::Info  << "Sidekix stopped" << Crails::Logger::endl;
     }
 
   private:
+    void watch(std::string command)
+    {
+      process.reset(new boost::process::child(command));
+      mutex.lock();
+      pid = process->id();
+      mutex.unlock();
+      process->wait();
+      if (process->exit_code() != 0)
+        Crails::logger << Crails::Logger::Error << "Sidekix process exited with code " << process->exit_code() << Crails::Logger::endl;
+      if (auto_restart)
+        watch(command);
+    }
+
     static std::string sidekix_bin()
     {
       std::filesystem::path exe_path;
