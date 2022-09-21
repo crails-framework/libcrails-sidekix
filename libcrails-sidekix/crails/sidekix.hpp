@@ -11,6 +11,9 @@ namespace Sidekix
   std::string schedule_task(std::time_t timestamp, const std::string& name, Data params);
   std::string schedule_task(std::time_t timestamp, const std::string& name, DataTree& params) { return schedule_task(timestamp, name, params.as_data()); }
   std::string schedule_task(std::time_t timestamp, const std::string& name) { return schedule_task(timestamp, name, DataTree()); }
+  std::string schedule_task_in(std::time_t interval, const std::string& name, Data params);
+  std::string schedule_task_in(std::time_t interval, const std::string& name, DataTree& params) { return schedule_task_in(interval, name, params.as_data()); }
+  std::string schedule_task_in(std::time_t interval, const std::string& name) { return schedule_task_in(interval, name, DataTree()); }
 };
 
 #endif
