@@ -1,6 +1,7 @@
 #ifndef  SIDEKIX_PROCESS_HPP
 # define SIDEKIX_PROCESS_HPP
 
+# include <atomic>
 # include <crails/utils/singleton.hpp>
 # include <crails/logger.hpp>
 # include <crails/program_options.hpp>
@@ -21,7 +22,7 @@ namespace Sidekix
     std::unique_ptr<boost::process::child> process;
     std::unique_ptr<std::thread> watcher;
     boost::process::detail::api::pid_t pid;
-    bool auto_restart = true;
+    std::atomic_bool auto_restart;
     std::mutex mutex;
   public:
     Process(int argc, const char** argv)
@@ -29,6 +30,7 @@ namespace Sidekix
       Crails::ProgramOptions options(argc, const_cast<const char**>(argv));
       std::stringstream command;
 
+      auto_restart = true;
       command << sidekix_bin();
       if (options.get_log_file().length() > 0)
         command << " -l \"" << transform_logpath(options.get_log_file()) << '"';
