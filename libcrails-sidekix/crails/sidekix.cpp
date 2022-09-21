@@ -17,10 +17,9 @@ namespace Sidekix
 
   string schedule_task_in(time_t interval, const string& name, Data params)
   {
-    time_t timestamp =
-        chrono::system_clock::to_time_t(chrono::system_clock::now())
-      + interval;
-
-    schedule_task(timestamp, name, params);
+    return schedule_task(
+      chrono::system_clock::to_time_t(chrono::system_clock::now() + chrono::seconds(interval)),
+      name, params
+    );
   }
 }
