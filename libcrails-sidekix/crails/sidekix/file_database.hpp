@@ -28,7 +28,7 @@ namespace Sidekix
           DataTree peek;
           peek.from_json(contents);
           Data run_at = peek["sidekix"]["run_at"];
-          return !run_at.exists() || run_at.as<std::time_t>() > timestamp;
+          return !run_at.exists() || run_at.as<std::time_t>() < timestamp;
         }
       } catch (...)
       {
@@ -70,6 +70,15 @@ namespace Sidekix
         task_data.from_json(contents);
         return true;
       }
+      return false;
+    }
+
+    bool pop(DataTree& task_data) const override
+    {
+      auto list = pending_tasks();
+
+      if (list.size() > 0)
+        return take(*list.begin(), task_data);
       return false;
     }
 

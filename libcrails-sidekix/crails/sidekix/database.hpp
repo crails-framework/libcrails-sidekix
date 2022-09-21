@@ -14,6 +14,7 @@ namespace Sidekix
     virtual ~SideTaskDatabase() {}
     virtual std::vector<std::string> pending_tasks() const = 0;
     virtual bool take(const std::string& id, DataTree& params) const = 0;
+    virtual bool pop(DataTree& params) = 0;
     virtual std::string schedule(const std::string& name, Data params) const = 0;
     virtual std::string schedule(std::time_t timestamp, const std::string& name, Data params) const
     {
@@ -23,7 +24,6 @@ namespace Sidekix
 
     static SideTaskDatabase* initialize();
     static SideTaskDatabase* instance();
-
   };
 }
 
