@@ -48,6 +48,14 @@ namespace Sidekix
         return false;
       }
 
+      bool pop(DataTree& task_data) const override
+      {
+        auto pending = pending_tasks();
+        if (pending.size() > 0)
+          return take(*pending.begin(), task_data);
+        return false;
+      }
+
       std::string schedule(const std::string& name, Data params) const override
       {
         using namespace std;
@@ -85,6 +93,18 @@ namespace Sidekix
       }
 
       bool has_task(const std::string& name) const { return count(name) > 0; }
+
+      bool scheduled_at(const std::string& name, std::time_t timestamp)
+      {
+        bool result = false;
+
+        each_task([&result, name, timestamp](const std::string& entry, const DataTree& params)
+        {
+          if (!result && entry == name)
+            result = params["sidekix"]["run_at"].defaults_to<std::time_t>(0) == timestamp;
+        });
+        return result;
+      }
     };
   }
 }
