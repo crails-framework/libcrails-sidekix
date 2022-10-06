@@ -9,3 +9,4 @@ email: michael@unetresgrossebite.com
 depends: * build2 >= 0.15.0
 depends: * bpkg >= 0.15.0
 depends: { libcrails libcrails-readfile libcrails-random } ^2.0.0
+depends: libboost-lockfree ^1.78.0
