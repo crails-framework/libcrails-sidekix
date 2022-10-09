@@ -35,7 +35,7 @@ namespace Sidekix
       {
         DataTree peek;
         peek.from_json(entry);
-        uids.push_back(peek["sidekix"]["task_uid"].as<string>());
+        uids.push_back(peek[Sidekix::task_uid_param].as<string>());
       }
       return uids;
     }
@@ -70,8 +70,8 @@ namespace Sidekix
       using namespace std;
       string uid = Crails::generate_random_string("abcdefghijklmnopqrstwxyz0123456789", 10);
 
-      params["sidekix"]["task_uid"] = uid;
-      params["sidekix"]["type"] = name;
+      params[Sidekix::task_uid_param] = uid;
+      params[Sidekix::task_type_param] = name;
       task_list.emplace(params.to_json(), timestamp);
       return uid;
     }

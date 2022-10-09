@@ -27,7 +27,7 @@ namespace Sidekix
         {
           DataTree peek;
           peek.from_json(contents);
-          Data run_at = peek["sidekix"]["run_at"];
+          Data run_at = peek[Sidekix::run_at_param];
           return !run_at.exists() || run_at.as<std::time_t>() < timestamp;
         }
       } catch (...)
@@ -91,8 +91,8 @@ namespace Sidekix
 
       if (file.is_open())
       {
-        params["sidekix"]["task_uid"] = uid;
-        params["sidekix"]["type"] = name;
+        params[Sidekix::task_uid_param] = uid;
+        params[Sidekix::task_type_param] = name;
         file << params.to_json();
         file.close();
       }

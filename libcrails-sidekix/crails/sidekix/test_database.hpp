@@ -22,10 +22,10 @@ namespace Sidekix
         vector<string> result;
         each_task([this, &result](const string&, const DataTree& params)
         {
-          Data run_at = params["sidekix"]["run_at"];
+          Data run_at = params[Sidekix::run_at_param];
 
           if (!run_at.exists() || run_at.as<time_t>() < current_timestamp)
-            result.push_back(params["sidekix"]["task_uid"]);
+            result.push_back(params[Sidekix::task_uid_param]);
         });
         return result;
       }
@@ -37,7 +37,7 @@ namespace Sidekix
         {
           for (auto task_data = it->second.begin() ; task_data != it->second.end() ; ++task_data)
           {
-            string task_uid = (*task_data)["sidekix"]["task_uid"];
+            string task_uid = (*task_data)[Sidekix::task_uid_param];
             if (task_uid == id)
             {
               task_data->as_data().merge(*task_data);
@@ -71,8 +71,8 @@ namespace Sidekix
         vector<DataTree> task_list = task_store->second;
         task_list.push_back(DataTree());
         (*task_list.rbegin()).as_data().merge(params);
-        (*task_list.rbegin())["sidekix"]["task_uid"] = uid;
-        (*task_list.rbegin())["sidekix"]["type"] = name;
+        (*task_list.rbegin())[Sidekix::task_uid_param] = uid;
+        (*task_list.rbegin())[Sidekix::task_type_param] = name;
         return uid;
       }
 
@@ -101,7 +101,7 @@ namespace Sidekix
         each_task([&result, name, timestamp](const std::string& entry, const DataTree& params)
         {
           if (!result && entry == name)
-            result = params["sidekix"]["run_at"].defaults_to<std::time_t>(0) == timestamp;
+            result = params[Sidekix::run_at_param].defaults_to<std::time_t>(0) == timestamp;
         });
         return result;
       }

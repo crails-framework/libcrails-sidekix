@@ -8,6 +8,10 @@
 
 namespace Sidekix
 {
+  extern const std::string run_at_param;
+  extern const std::string task_uid_param;
+  extern const std::string task_type_param;
+
   class SideTaskDatabase
   {
   public:
@@ -18,7 +22,7 @@ namespace Sidekix
     virtual std::string schedule(const std::string& name, Data params) const = 0;
     virtual std::string schedule(std::time_t timestamp, const std::string& name, Data params) const
     {
-      params["sidekix"]["run_at"] = timestamp;
+      params[Sidekix::run_at_param] = timestamp;
       return schedule(name, params);
     }
 
