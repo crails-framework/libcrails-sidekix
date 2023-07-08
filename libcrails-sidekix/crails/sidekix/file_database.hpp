@@ -6,6 +6,7 @@
 # include <crails/read_file.hpp>
 # include <crails/utils/random_string.hpp>
 # include <crails/environment.hpp>
+# include <crails/logger.hpp>
 # include <fstream>
 # include <filesystem>
 # include <chrono>
@@ -86,7 +87,7 @@ namespace Sidekix
     {
       using namespace std;
       string   uid      = Crails::generate_random_string("abcdefghijklmnopqrstwxyz0123456789", 10);
-      string   filename = filesystem::canonical(storage_path).string() + '/' + uid;
+      string   filename = (filesystem::canonical(storage_path) / uid).string();
       ofstream file(filename.c_str());
 
       if (file.is_open())
@@ -95,6 +96,7 @@ namespace Sidekix
         params[Sidekix::task_type_param] = name;
         file << params.to_json();
         file.close();
+        Crails::logger << Crails::Logger::Debug << "Sidekix scheduled task " << filename << Crails::Logger::endl;
       }
       else
         throw boost_ext::runtime_error("sidekix cannot create file " + filename);
