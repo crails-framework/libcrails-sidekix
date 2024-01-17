@@ -11,6 +11,7 @@ namespace Sidekix
   extern const std::string run_at_param;
   extern const std::string task_uid_param;
   extern const std::string task_type_param;
+  extern const std::string output_file_param;
 
   class SideTaskDatabase
   {

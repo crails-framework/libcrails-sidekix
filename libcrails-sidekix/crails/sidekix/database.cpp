@@ -7,6 +7,7 @@ namespace Sidekix
   const std::string run_at_param("sidekix.run_at");
   const std::string task_uid_param("sidekix.task_uid");
   const std::string task_type_param("sidekix.type");
+  const std::string output_file_param("sidekix.output");
 }
 
 Sidekix::SideTaskDatabase* Sidekix::SideTaskDatabase::instance()
