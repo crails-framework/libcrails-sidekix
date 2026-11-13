@@ -12,6 +12,7 @@
 # include <filesystem>
 # include <thread>
 # include <mutex>
+# include <vector>
 # ifdef _WIN32
 #  include <Windows.h>
 # endif
@@ -34,22 +35,16 @@ namespace Sidekix
     Process(int argc, const char** argv)
     {
       Crails::ProgramOptions options(argc, const_cast<const char**>(argv));
-      std::stringstream command;
+      std::string log_file = options.get_log_file();
+      std::string error_log_file = options.get_error_log_file();
 
-      auto_restart = true;
-      command << sidekix_bin();
-      if (options.get_log_file().length() > 0)
-        command << " -l \"" << transform_logpath(options.get_log_file()) << '"';
-      if (options.get_error_log_file().length() > 0)
-        command << " -e \"" << transform_logpath(options.get_error_log_file()) << '"';
-
-      Crails::logger << Crails::Logger::Info << "Starting sidekix (" << command.str() << ')' << Crails::Logger::endl;
+      Crails::logger << Crails::Logger::Info << "Starting sidekix (" << sidekix_bin() << ')' << Crails::Logger::endl;
 
       // Keep the io_context running in a background thread for v2 process monitoring/async features
       work_guard.emplace(boost::asio::make_work_guard(ioc));
       asio_thread = std::make_unique<std::thread>([this]() { ioc.run(); });
 
-      watcher.reset(new std::thread(std::bind(&Sidekix::Process::watch, this, command.str())));
+      watcher.reset(new std::thread(std::bind(&Sidekix::Process::watch, this, log_file, error_log_file)));
     }
 
     ~Process()
@@ -76,16 +71,27 @@ namespace Sidekix
     }
 
   private:
-    void watch(std::string command_str)
+    void watch(std::string log_file, std::string error_log_file)
     {
       try
       {
-        // Boost.Process v2 shell parsing and execution
-        auto sh = boost::process::v2::shell(command_str);
+        std::vector<std::string> args;
+        if (!log_file.empty())
+        {
+          args.push_back("-l");
+          args.push_back(transform_logpath(log_file));
+        }
+        if (!error_log_file.empty())
+        {
+          args.push_back("-e");
+          args.push_back(transform_logpath(error_log_file));
+        }
+
+        // Directly pass executable path and argument vector to avoid shell parsing errors
         process = std::make_unique<boost::process::v2::process>(
             ioc, 
-            sh.exe(), 
-            sh.args()
+            sidekix_bin(), 
+            args
         );
 
         mutex.lock();
@@ -108,7 +114,7 @@ namespace Sidekix
       }
 
       if (auto_restart)
-        watch(command_str);
+        watch(log_file, error_log_file);
     }
 
     static std::string sidekix_bin()
